@@ -15,13 +15,25 @@ var exec = require('child_process').exec;
 var interval = 7 * 60 * 1000;
 
 function getTopNextQuestionCandidate(callback) {
-    http.get('http://localhost:3000/questions/next/1', function (questions) {
-        if (questions === undefined || questions === null || questions.length === 0) {
-            callback(null);
-        }
-        else {
-            callback(questions[0]);
-        }
+    http.get('http://localhost:3000/questions/next/1', function (response) {
+        var dataTotal = '';
+        response.on('data', function (data) {
+            dataTotal += data;
+        });
+        response.on('end', function () {
+            if (dataTotal === '') {
+                callback(null);
+            }
+            else {
+                var questions = JSON.parse(dataTotal);
+                if (questions === undefined || questions === null || questions.length === 0) {
+                    callback(null);
+                }
+                else {
+                    callback(questions[0]);
+                }
+            }
+        });
     });
 }
 
