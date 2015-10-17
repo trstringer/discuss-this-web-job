@@ -9,10 +9,14 @@
  * to set the next question. this will be implemented soon
  */
 
+var config = {
+    questionDisplayMinutes: 1
+};
+
 var http = require('http');
 var exec = require('child_process').exec;
 
-var interval = 7 * 60 * 1000;
+var interval = config.questionDisplayMinutes * 60 * 1000;
 
 function getTopNextQuestionCandidate(callback) {
     http.get('http://localhost:3000/questions/next/1', function (response) {
