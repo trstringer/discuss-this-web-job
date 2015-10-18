@@ -10,7 +10,9 @@
  */
 
 var config = {
-    questionDisplayMinutes: 1
+    questionDisplayMinutes: 1,
+    hostName: 'localhost',
+    requestPort: 3000
 };
 
 var http = require('http');
@@ -19,7 +21,7 @@ var exec = require('child_process').exec;
 var interval = config.questionDisplayMinutes * 60 * 1000;
 
 function getTopNextQuestionCandidate(callback) {
-    http.get('http://localhost:3000/questions/next/1', function (response) {
+    http.get('http://' + config.hostName + ':' + config.requestPort + '/questions/next/1', function (response) {
         var dataTotal = '';
         response.on('data', function (data) {
             dataTotal += data;
@@ -51,9 +53,9 @@ function setNextQuestion() {
             //
             req = http.request(
                 {
-                    host: 'localhost',
+                    host: config.hostName,
                     path: '/questions/noquestion',
-                    port: 3000,
+                    port: config.requestPort,
                     method: 'POST'
                 }
             );
@@ -66,9 +68,9 @@ function setNextQuestion() {
         else {
             req = http.request(
                 {
-                    host: 'localhost',
+                    host: config.hostName,
                     path: '/questions/gen',
-                    port: 3000,
+                    port: config.requestPort,
                     method: 'POST'
                 }
             );
@@ -82,6 +84,8 @@ function setNextQuestion() {
 }
 
 // set the dateAsked of the current question to the now time
+//
+// THIS IS FOR DEBUGGING AND TESTING ONLY
 //
 exec('mongo .\\data\\mongo-set-current-question-dateAsked.js', function (err, stdout, stderr) {
     console.log(stdout);
