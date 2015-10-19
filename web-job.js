@@ -87,10 +87,13 @@ function setNextQuestion() {
 //
 // THIS IS FOR DEBUGGING AND TESTING ONLY
 //
-exec('mongo .\\data\\mongo-set-current-question-dateAsked.js', function (err, stdout, stderr) {
-    console.log(stdout);
-    console.log(stderr);
-    
-    console.log('current date: ' + (new Date()).toLocaleString());
-    setInterval(setNextQuestion, interval);
-});
+if (process.env.NODE_ENV === 'development') {
+    console.log('development environment, setting current dateAsked...');
+    exec('mongo .\\data\\mongo-set-current-question-dateAsked.js', function (err, stdout, stderr) {
+        console.log(stdout);
+        console.log(stderr);
+        
+        console.log('current date: ' + (new Date()).toLocaleString());
+        setInterval(setNextQuestion, interval);
+    });
+}
