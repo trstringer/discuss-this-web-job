@@ -9,6 +9,15 @@
  * to set the next question. this will be implemented soon
  */
 
+var Twitter = require('twitter');
+
+var client = new Twitter({
+    consumer_key: process.env.TWITTER_CONSUMER_KEY,
+    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+    access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+    access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+});
+
 var config = {
     questionDisplayMinutes: 1,
     hostName: 'localhost',
@@ -19,6 +28,25 @@ var http = require('http');
 var exec = require('child_process').exec;
 
 var interval = config.questionDisplayMinutes * 60 * 1000;
+
+function formatTweetText(tweetText) {
+    var maxCharacterCount = 140;
+    var cutOff = ' ...';
+    
+    if (tweetText > maxCharacterCount) {
+        if (tweetText[maxCharacterCount - cutOff.length - 1] === ' ') {
+            tweetText = tweetText.substring(0, maxCharacterCount - cutOff.length - 1) + cutOff;
+        }
+        else {
+            tweetText = tweetText.substring(0, tweetText.substring(0, maxCharacterCount - cutOff.length - 1).lastIndexOf(' ')) + cutOff;
+        }
+    }
+    
+    return tweetText;
+}
+function tweetQuestion(question) {
+    
+}
 
 function getTopNextQuestionCandidate(callback) {
     http.get('http://' + config.hostName + ':' + config.requestPort + '/questions/next/1', function (response) {
