@@ -122,6 +122,7 @@ if (process.env.NODE_ENV === 'development') {
         console.log(stderr);
         
         console.log('current date: ' + (new Date()).toLocaleString());
-        setInterval(setNextQuestion, interval);
     });
 }
+
+setInterval(setNextQuestion, interval);
