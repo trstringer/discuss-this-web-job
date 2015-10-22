@@ -9,6 +9,8 @@
  * to set the next question. this will be implemented soon
  */
 
+var http = require('http');
+var exec = require('child_process').exec;
 var Twitter = require('twitter');
 
 var client = new Twitter({
@@ -24,16 +26,13 @@ var config = {
     requestPort: 3000
 };
 
-var http = require('http');
-var exec = require('child_process').exec;
-
 var interval = config.questionDisplayMinutes * 60 * 1000;
 
 function formatTweetText(tweetText) {
     var maxCharacterCount = 140;
     var cutOff = ' ...';
     
-    if (tweetText > maxCharacterCount) {
+    if (tweetText.length > maxCharacterCount) {
         if (tweetText[maxCharacterCount - cutOff.length - 1] === ' ') {
             tweetText = tweetText.substring(0, maxCharacterCount - cutOff.length - 1) + cutOff;
         }
@@ -45,7 +44,11 @@ function formatTweetText(tweetText) {
     return tweetText;
 }
 function tweetQuestion(question) {
-    
+    client.post('statuses/update', {status: formatTweetText(question.text)}, function (err, tweet, res) {
+        if (err) {
+            throw err;
+        }
+    });
 }
 
 function getTopNextQuestionCandidate(callback) {
@@ -94,6 +97,7 @@ function setNextQuestion() {
             req.end();
         }
         else {
+            tweetQuestion(question);
             req = http.request(
                 {
                     host: config.hostName,
@@ -115,6 +119,7 @@ function setNextQuestion() {
 //
 // THIS IS FOR DEBUGGING AND TESTING ONLY
 //
+
 if (process.env.NODE_ENV === 'development') {
     console.log('development environment, setting current dateAsked...');
     exec('mongo .\\data\\mongo-set-current-question-dateAsked.js', function (err, stdout, stderr) {
@@ -126,3 +131,5 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 setInterval(setNextQuestion, interval);
+
+
