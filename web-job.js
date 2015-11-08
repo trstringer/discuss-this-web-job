@@ -12,6 +12,7 @@
 var http = require('http');
 var exec = require('child_process').exec;
 var Twitter = require('twitter');
+var DocumentClient = require('documentdb').DocumentClient;
 
 var client = new Twitter({
     consumer_key: process.env.TWITTER_CONSUMER_KEY,
@@ -122,14 +123,60 @@ function setNextQuestion() {
 
 if (process.env.NODE_ENV === 'development') {
     console.log('development environment, setting current dateAsked...');
-    exec('mongo .\\data\\mongo-set-current-question-dateAsked.js', function (err, stdout, stderr) {
-        console.log(stdout);
-        console.log(stderr);
-        
-        console.log('current date: ' + (new Date()).toLocaleString());
-    });
+    if (process.env.DBMS_TYPE === 'documentdb') {
+        console.log('using documentdb...');
+        var docClient = new DocumentClient(process.env.DOCUMENTDB_HOST_URL, {masterKey: process.env.DOCUMENTDB_MASTER_KEY});
+        var dbQuery = {
+            query: 'SELECT * FROM d WHERE d.id = @id',
+            parameters: [
+                {
+                    name: '@id',
+                    value: process.env.DOCUMENTDB_DB_NAME
+                }
+            ]
+        };
+        docClient.queryDatabases(dbQuery)
+            .current(function (err, database) {
+                if (!err && database) {
+                    var collQuery = {
+                        query: 'SELECT * FROM c WHERE c.id = @id',
+                        parameters: [
+                            {
+                                name: '@id',
+                                value: process.env.DOCUMENTDB_QUESTION_COL_NAME
+                            }
+                        ]
+                    };
+                    docClient.queryCollections(database._self, collQuery)
+                        .current(function (err, collection) {
+                            if (!err && collection) {
+                                var docQuery = 'SELECT * FROM q WHERE q.isCurrent = true';
+                                docClient.queryDocuments(collection._self, docQuery)
+                                    .current(function (err, element) {
+                                        if (!err && element) {
+                                            var currentDate = new Date();
+                                            console.log('setting current datetime for current question: ' + currentDate);
+                                            element.dateAsked = currentDate;
+                                            docClient.replaceDocument(element._self, element, function (err, res) {
+                                                if (!err && res) {
+                                                    console.log('successfully set current dateAsked to ' + res.dateAsked);
+                                                }
+                                            });
+                                        }
+                                    });
+                            }
+                        });
+                }
+            });
+    }
+    else {
+        exec('mongo .\\data\\mongo-set-current-question-dateAsked.js', function (err, stdout, stderr) {
+            console.log(stdout);
+            console.log(stderr);
+            
+            console.log('current date: ' + (new Date()).toLocaleString());
+        });
+    }
 }
 
 setInterval(setNextQuestion, interval);
-
-
