@@ -46,7 +46,7 @@ function formatTweetText(tweetText) {
 }
 function tweetQuestion(question) {
     client.post('statuses/update', {status: formatTweetText(question.text)}, function (err, tweet, res) {
-        if (err) {
+        if (err && process.env.NODE_ENV !== 'development') {
             throw err;
         }
     });
