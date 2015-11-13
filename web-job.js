@@ -179,4 +179,4 @@ if (process.env.NODE_ENV === 'development') {
     }
 }
 
-setInterval(setNextQuestion, interval);
+setInterval(setNextQuestion, interval); 
