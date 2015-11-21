@@ -10,5 +10,8 @@
   "license": "ISC",
   "devDependencies": {
     "documentdb": "^1.4.0"
+  },
+  "dependencies": {
+    "twitter": "^1.2.5"
   }
 }
