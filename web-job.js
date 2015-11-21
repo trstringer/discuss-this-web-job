@@ -86,7 +86,7 @@ function setNextQuestion() {
             req = http.request(
                 {
                     host: config.hostName,
-                    path: '/questions/noquestion',
+                    path: '/questions/noquestion/' + process.env.JOBKEY,
                     port: config.requestPort,
                     method: 'POST'
                 }
@@ -102,7 +102,7 @@ function setNextQuestion() {
             req = http.request(
                 {
                     host: config.hostName,
-                    path: '/questions/gen',
+                    path: '/questions/gen/' + process.env.JOBKEY,
                     port: config.requestPort,
                     method: 'POST'
                 }
