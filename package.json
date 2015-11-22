@@ -12,6 +12,7 @@
     "documentdb": "^1.4.0"
   },
   "dependencies": {
+    "trill": "^1.0.0",
     "twitter": "^1.2.5"
   }
 }

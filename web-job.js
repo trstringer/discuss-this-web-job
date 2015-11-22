@@ -11,15 +11,8 @@
 
 var http = require('http');
 var exec = require('child_process').exec;
-var Twitter = require('twitter');
 var DocumentClient = require('documentdb').DocumentClient;
-
-var client = new Twitter({
-    consumer_key: process.env.TWITTER_CONSUMER_KEY,
-    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-    access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
-    access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
-});
+var trill = require('trill');
 
 var config = {
     questionDisplayMinutes: 1,
@@ -29,26 +22,20 @@ var config = {
 
 var interval = config.questionDisplayMinutes * 60 * 1000;
 
-function formatTweetText(tweetText) {
-    var maxCharacterCount = 140;
-    var cutOff = ' ...';
-    
-    if (tweetText.length > maxCharacterCount) {
-        if (tweetText[maxCharacterCount - cutOff.length - 1] === ' ') {
-            tweetText = tweetText.substring(0, maxCharacterCount - cutOff.length - 1) + cutOff;
-        }
-        else {
-            tweetText = tweetText.substring(0, tweetText.substring(0, maxCharacterCount - cutOff.length - 1).lastIndexOf(' ')) + cutOff;
-        }
-    }
-    
-    return tweetText;
-}
 function tweetQuestion(question) {
-    client.post('statuses/update', {status: formatTweetText(question.text)}, function (err, tweet, res) {
-        if (err && process.env.NODE_ENV !== 'development') {
-            throw err;
-        }
+    var twitterAuth = {
+        consumer_key: process.env.TWITTER_CONSUMER_KEY,
+        consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+        access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+        access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+    };
+    var tweet = {
+        text: question.text,
+        wrap: false
+    };
+    
+    trill(twitterAuth, tweet, function () {
+        console.log('tweet successful...');
     });
 }
 
