@@ -34,8 +34,10 @@ function tweetQuestion(question) {
         wrap: false
     };
     
-    trill(twitterAuth, tweet, function () {
-        console.log('tweet successful...');
+    trill(twitterAuth, tweet, function (err) {
+        if (err) {
+            console.log(err);
+        }
     });
 }
 
