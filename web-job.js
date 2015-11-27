@@ -16,8 +16,8 @@ var trill = require('trill');
 
 var config = {
     questionDisplayMinutes: 1,
-    hostName: 'localhost',
-    requestPort: 3000
+    hostName: 'worldlydiscussions.azurewebsites.net',
+    requestPort: 80
 };
 
 var interval = config.questionDisplayMinutes * 60 * 1000;
