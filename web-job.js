@@ -16,9 +16,15 @@ var trill = require('trill');
 
 var config = {
     questionDisplayMinutes: 1,
+    decIntervalSeconds: 1,
     hostName: 'worldlydiscussions.azurewebsites.net',
     requestPort: 80
 };
+
+if (process.env.NODE_ENV === 'development') {
+    config.hostName = 'localhost';
+    config.requestPort = 3000;
+}
 
 var interval = config.questionDisplayMinutes * 60 * 1000;
 
@@ -62,6 +68,37 @@ function getTopNextQuestionCandidate(callback) {
             }
         });
     });
+}
+
+function decrementEntity(callback) {
+    var resData = '';
+    var resObj;
+    var req = http.request(
+        {
+            host: config.hostName,
+            path: '/questions/dectimeremaining/' + process.env.JOBKEY,
+            port: config.requestPort,
+            method: 'POST'
+        }, 
+        function (res) {
+            res.on('data', function (data) {
+                resData += data;
+            });
+            res.on('end', function () {
+                if (resData !== '') {
+                    resObj = JSON.parse(resData);
+                }
+                else {
+                    resObj = {};
+                }
+                callback(undefined, resObj);
+            });
+        });
+    req.on('error', function (err) {
+        console.log('request error: ' + err.message);
+        callback(err);
+    });
+    req.end();
 }
 
 function setNextQuestion() {
@@ -168,4 +205,16 @@ if (process.env.NODE_ENV === 'development') {
     }
 }
 
-setInterval(setNextQuestion, interval); 
+setInterval(
+    function () {
+        decrementEntity(function (err, entity) {
+            if (!err) {
+                console.log('time remaining: ' + entity.remainingTime + ' seconds...');
+                if (entity.remainingTime <= 0) {
+                    setNextQuestion();
+                }
+            }
+        });
+    }, 
+    config.decIntervalSeconds * 1000
+); 
