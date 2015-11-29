@@ -42,7 +42,7 @@ function tweetQuestion(question) {
     
     trill(twitterAuth, tweet, function (err) {
         if (err) {
-            console.log(err);
+            console.log('trill error ' + err);
         }
     });
 }
@@ -101,10 +101,10 @@ function decrementEntity(callback) {
     req.end();
 }
 
-function setNextQuestion() {
+function setNextQuestion(callback) {
     getTopNextQuestionCandidate(function (question) {
         var req;
-        if (question === undefined || question === null) {
+        if (!question) {
             // there is no next question candidate so now
             // we need to set the current no question start date
             // to right now for clients to pull from
@@ -115,7 +115,8 @@ function setNextQuestion() {
                     path: '/questions/noquestion/' + process.env.JOBKEY,
                     port: config.requestPort,
                     method: 'POST'
-                }
+                }, 
+                callback
             );
             req.on('error', function (ex) {
                 console.log('request error: ' + ex.message);
@@ -131,7 +132,8 @@ function setNextQuestion() {
                     path: '/questions/gen/' + process.env.JOBKEY,
                     port: config.requestPort,
                     method: 'POST'
-                }
+                },
+                callback
             );
             req.on('error', function (ex) {
                 console.log('request error: ' + ex.message);
@@ -205,16 +207,27 @@ if (process.env.NODE_ENV === 'development') {
     }
 }
 
+var isOperationOngoing = false;
 setInterval(
     function () {
-        decrementEntity(function (err, entity) {
-            if (!err) {
-                console.log('time remaining: ' + entity.remainingTime + ' seconds...');
-                if (entity.remainingTime <= 0) {
-                    setNextQuestion();
+        if (!isOperationOngoing) {
+            isOperationOngoing = true;
+            decrementEntity(function (err, entity) {
+                if (!err) {
+                    console.log('time remaining: ' + entity.remainingTime + ' seconds...');
+                    if (entity.remainingTime <= 0) {
+                        console.log('end of current entity, setting next question...');
+                        setNextQuestion(function () {
+                            console.log('next entity set...');
+                            isOperationOngoing = false;
+                        });
+                    }
+                    else {
+                        isOperationOngoing = false;
+                    }
                 }
-            }
-        });
+            });
+        }
     }, 
     config.decIntervalSeconds * 1000
 ); 
