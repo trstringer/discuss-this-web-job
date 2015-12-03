@@ -214,11 +214,8 @@ setInterval(
             isOperationOngoing = true;
             decrementEntity(function (err, entity) {
                 if (!err) {
-                    console.log('time remaining: ' + entity.remainingTime + ' seconds...');
                     if (entity.remainingTime <= 0) {
-                        console.log('end of current entity, setting next question...');
                         setNextQuestion(function () {
-                            console.log('next entity set...');
                             isOperationOngoing = false;
                         });
                     }
