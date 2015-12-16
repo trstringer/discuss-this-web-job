@@ -18,7 +18,8 @@ var config = {
     questionDisplayMinutes: 1,
     decIntervalSeconds: 1,
     hostName: 'worldlydiscussions.com',
-    requestPort: 80
+    requestPort: 80,
+    questionIdRefLength: 8
 };
 
 if (process.env.NODE_ENV === 'development') {
@@ -37,7 +38,10 @@ function tweetQuestion(question) {
     };
     var tweet = {
         text: question.text,
-        wrap: false
+        wrap: false,
+        link: {
+            url: 'http://' + config.hostName + '/questions/' + question._id.replace(/-/g, '').substring(0, config.questionIdRefLength)
+        }
     };
     
     trill(twitterAuth, tweet, function (err) {
