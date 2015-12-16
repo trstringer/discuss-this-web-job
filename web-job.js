@@ -17,7 +17,7 @@ var trill = require('trill');
 var config = {
     questionDisplayMinutes: 1,
     decIntervalSeconds: 1,
-    hostName: 'worldlydiscussions.azurewebsites.net',
+    hostName: 'worldlydiscussions.com',
     requestPort: 80
 };
 
