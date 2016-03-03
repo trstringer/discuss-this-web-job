@@ -15,7 +15,7 @@ var DocumentClient = require('documentdb').DocumentClient;
 var trill = require('trill');
 
 var config = {
-    questionDisplayMinutes: 1,
+    questionDisplayMinutes: 7,
     decIntervalSeconds: 1,
     hostName: 'worldlydiscussions.com',
     requestPort: 80,
