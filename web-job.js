@@ -29,6 +29,16 @@ if (process.env.NODE_ENV === 'development') {
 
 var interval = config.questionDisplayMinutes * 60 * 1000;
 
+function biggestWord(sentence) {
+  var noPunctuation = sentence.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,'').replace(/\s{2,}/g, ' ').replace('?', '');
+  var words = noPunctuation.split(' ');
+  words.sort(function (a, b) {
+    return b.length - a.length;
+  });
+  
+  return words[0];
+}
+
 function tweetQuestion(question) {
     var twitterAuth = {
         consumer_key: process.env.TWITTER_CONSUMER_KEY,
@@ -39,6 +49,7 @@ function tweetQuestion(question) {
     var tweet = {
         text: question.text,
         wrap: false,
+        hashtags: ['worldly', biggestWord(question.text)],
         link: {
             url: 'http://' + config.hostName + '/questions/' + question._id.replace(/-/g, '').substring(0, config.questionIdRefLength)
         }
